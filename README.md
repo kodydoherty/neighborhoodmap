@@ -10,3 +10,5 @@ http://knockoutjs.com/documentation/attr-binding.html
 http://api.jquery.com/
 http://getbootstrap.com/
 http://www.knockmeout.net/2011/04/utility-functions-in-knockoutjs.html
+http://discussions.udacity.com/t/google-map-marker-filter-issues/15244/6
+https://developers.google.com/maps/documentation/javascript/reference
