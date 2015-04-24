@@ -162,30 +162,50 @@ var ViewModel = function() {
 
         self.hotSpotList()[i].marker = marker;
 
-          $.ajax({
-                 url: 'https://api.foursquare.com/v2/venues/explore',
-                 dataType: 'json',
-                 data: 'limit=1&ll='+self.hotSpotList()[i].lat()+','+self.hotSpotList()[i].lng()+ '&query=' +self.hotSpotList()[i].name() +'&client_id='+CLIENT_ID+'&client_secret='+CLIENT_SECRET+'&v=20140806&m=foursquare',
-                 async: true,
+        $.ajax({
+                url: 'https://api.foursquare.com/v2/venues/explore',
+                dataType: 'json',
+                data: 'limit=1&ll='+self.hotSpotList()[i].lat()+','+self.hotSpotList()[i].lng()+ '&query=' +self.hotSpotList()[i].name() +'&client_id='+CLIENT_ID+'&client_secret='+CLIENT_SECRET+'&v=20140806&m=foursquare',
+                async: true,
+                hotspot : self.hotSpotList()[i],
+                mark : marker,
                 success: function(data) {
-                    self.hotSpotList()[i].rating = 1;
-                    // self.hotSpotList()[i].rating = data.response.groups[0].items[0].venue.rating;
-                    console.log(data.response.groups[0].items[0].venue.rating);
+                    this.hotspot.rating = data.response.groups[0].items[0].venue.rating;
+                    var selector = '#rating' + i;
+                    $(selector).text(this.hotspot.rating);
+                    console.log(this.hotspot.rating);
+                    listener(this.mark, i);
                 }
         });
-        google.maps.event.addListener(marker, 'click', (function(marker, i) {
-            return function() {
-                url = self.hotSpotList()[i].img();
-                contentString = "<h1>" + self.hotSpotList()[i].name() + "</h1><br>" +
-                    "<p>" + self.hotSpotList()[i].street() + "<br>" +
-                    self.hotSpotList()[i].city() + ", " + self.hotSpotList()[i].state() +
-                    "<br>" + self.hotSpotList()[i].phone() + "<br><a href='" +
-                    self.hotSpotList()[i].website() + "'>website</a></p><br>" + "<img class='img-responsive' src='" + url + "<br><p>Foursquare Rating: " +self.hotSpotList()[i].rating() + "</p>";
-                infoWindow.setContent(contentString);
-                infoWindow.open(map, marker);
-            };
-        })(marker, i));
     }
+
+    function listener(m, markerId) {
+             google.maps.event.addListener(m, 'click', (function(m, markerId) {
+            return function() {
+                url = self.hotSpotList()[markerId].img();
+                contentString = "<h1>" + self.hotSpotList()[markerId].name() + "</h1><br>" +
+                    "<p>" + self.hotSpotList()[markerId].street() + "<br>" +
+                    self.hotSpotList()[markerId].city() + ", " + self.hotSpotList()[i].state() +
+                    "<br>" + self.hotSpotList()[markerId].phone() + "<br><a href='" +
+                    self.hotSpotList()[markerId].website() + "'>website</a></p><br><p>foursquare rating:" + self.hotSpotList()[markerId].rating()  +"</span></p>";
+                infoWindow.setContent(contentString);
+                infoWindow.open(map, m);
+            };
+        })(m, markerId));
+    }
+
+          // google.maps.event.addListener(marker, 'click', (function(marker, i) {
+        //     return function() {
+        //         url = self.hotSpotList()[i].img();
+        //         contentString = "<h1>" + self.hotSpotList()[i].name() + "</h1><br>" +
+        //             "<p>" + self.hotSpotList()[i].street() + "<br>" +
+        //             self.hotSpotList()[i].city() + ", " + self.hotSpotList()[i].state() +
+        //             "<br>" + self.hotSpotList()[i].phone() + "<br><a href='" +
+        //             self.hotSpotList()[i].website() + "'>website</a></p><br><p>foursquare rating:" + "<span id='rating"+ i +"'></span></p>";
+        //         infoWindow.setContent(contentString);
+        //         infoWindow.open(map, marker);
+        //     };
+        // })(marker, i));
 
     //Hotspot array after it has been filtered
     this.searchLocation = ko.computed(function() {
