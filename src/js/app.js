@@ -78,7 +78,7 @@ var initialHotSpots = [{
     state: "MD",
     phone: "(443) 537-2900",
     website: "http://www.wegmans.com/webapp/wcs/stores/servlet/StoreDetailView?langId=-1&storeId=10052&catalogId=10002&productId=738282"
-}, ];
+} ];
 
 // Build each hotspot
 var hotSpot = function(data) {
@@ -101,7 +101,7 @@ var hotSpot = function(data) {
     }, this);
 };
 
-var ViewModel = function() {
+var ViewModel = function () {
 
     // Map and list view navigation
     $("#list").hide();
@@ -150,7 +150,6 @@ var ViewModel = function() {
     // Initilize some varibles
     var marker, i;
     var contentString = "";
-    var makers;
     var url = "";
 
     //Initialize marker and infowindow
@@ -163,49 +162,37 @@ var ViewModel = function() {
         self.hotSpotList()[i].marker = marker;
 
         $.ajax({
-                url: 'https://api.foursquare.com/v2/venues/explore',
-                dataType: 'json',
-                data: 'limit=1&ll='+self.hotSpotList()[i].lat()+','+self.hotSpotList()[i].lng()+ '&query=' +self.hotSpotList()[i].name() +'&client_id='+CLIENT_ID+'&client_secret='+CLIENT_SECRET+'&v=20140806&m=foursquare',
-                async: true,
-                hotspot : self.hotSpotList()[i],
-                mark : marker,
-                success: function(data) {
-                    this.hotspot.rating = data.response.groups[0].items[0].venue.rating;
-                    var selector = '#rating' + i;
-                    $(selector).text(this.hotspot.rating);
-                    console.log(this.hotspot.rating);
-                    listener(this.mark, i);
-                }
+            url: 'https://api.foursquare.com/v2/venues/explore',
+            dataType: 'json',
+            data: 'limit=1&ll=' + self.hotSpotList()[i].lat() + ',' + self.hotSpotList()[i].lng() + '&query=' + self.hotSpotList()[i].name() + '&client_id=' + CLIENT_ID + '&client_secret=' + CLIENT_SECRET + '&v=20140806&m=foursquare',
+            async: true,
+            hotspot: self.hotSpotList()[i],
+            mark: marker,
+            index: i,
+            success: function(data) {
+                this.hotspot.rating = data.response.groups[0].items[0].venue.rating;
+                listener(this.mark, this.index, this.hotspot.rating);
+            }
         });
     }
 
-    function listener(m, markerId) {
-             google.maps.event.addListener(m, 'click', (function(m, markerId) {
+
+    // Add content to each marker on a click event
+    // Takes a marker, index of the maker and the current rating.
+    function listener(m, markerId, rating) {
+        google.maps.event.addListener(m, 'click', (function(m, markerId, rating) {
             return function() {
                 url = self.hotSpotList()[markerId].img();
                 contentString = "<h1>" + self.hotSpotList()[markerId].name() + "</h1><br>" +
                     "<p>" + self.hotSpotList()[markerId].street() + "<br>" +
-                    self.hotSpotList()[markerId].city() + ", " + self.hotSpotList()[i].state() +
+                    self.hotSpotList()[markerId].city() + ", " + self.hotSpotList()[markerId].state() +
                     "<br>" + self.hotSpotList()[markerId].phone() + "<br><a href='" +
-                    self.hotSpotList()[markerId].website() + "'>website</a></p><br><p>foursquare rating:" + self.hotSpotList()[markerId].rating()  +"</span></p>";
+                    self.hotSpotList()[markerId].website() + "'>website</a></p><br><p>foursquare rating: " + rating + "</span></p>";
                 infoWindow.setContent(contentString);
                 infoWindow.open(map, m);
             };
-        })(m, markerId));
+        })(m, markerId, rating));
     }
-
-          // google.maps.event.addListener(marker, 'click', (function(marker, i) {
-        //     return function() {
-        //         url = self.hotSpotList()[i].img();
-        //         contentString = "<h1>" + self.hotSpotList()[i].name() + "</h1><br>" +
-        //             "<p>" + self.hotSpotList()[i].street() + "<br>" +
-        //             self.hotSpotList()[i].city() + ", " + self.hotSpotList()[i].state() +
-        //             "<br>" + self.hotSpotList()[i].phone() + "<br><a href='" +
-        //             self.hotSpotList()[i].website() + "'>website</a></p><br><p>foursquare rating:" + "<span id='rating"+ i +"'></span></p>";
-        //         infoWindow.setContent(contentString);
-        //         infoWindow.open(map, marker);
-        //     };
-        // })(marker, i));
 
     //Hotspot array after it has been filtered
     this.searchLocation = ko.computed(function() {
@@ -226,7 +213,6 @@ var ViewModel = function() {
             });
         }
     }, this);
-
 
 };
 
